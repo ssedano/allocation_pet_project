@@ -2,8 +2,9 @@
   (use [korma.db]
        [korma.core]
        )
-  (import [org.jclouds.abiquo.domain.infrastructure Datacenter Rack Machine]
+  (import [org.jclouds.abiquo.domain.infrastructure Datacenter Rack Machine Datastore]
           [org.jclouds.abiquo  AbiquoContextFactory]
+          [com.abiquo.model.enumerator HypervisorType]
           [java.util Properties]))
 
 
@@ -37,6 +38,18 @@
         dc (. dcbuilder (build))]
           (. dc (save))))
   
+(defn create-machine
+  [datacenter rack]
+  (let [machine (. datacenter (discoverSingleMachine "10.60.1.120" (HypervisorType/VMX_04) "root" "temporal" 443))
+        datastore (. machine (findDatastore "datastore1 (2)"))
+        switch (. machine (findAvailableVirtualSwitch  "dvSwitchQA"))]
+          (. datastore (setEnabled (Boolean/TRUE)))
+          (. machine (setVirtualSwitch switch))
+          (. machine (setRack rack))
+          (. machine (save))))
+
+
+
 
 (defn random-char []
   (rand-nth VALID-CHARS))
@@ -54,13 +67,8 @@
   [& args]
   (doseq [i (range 0 1)]
     (println (exec-raw [allocate-sql [2]] :results)))
-  (println (. dcs (size)))
   (if (< (. dcs (size)) 1)
-    (do (create)
-    (create-racks)))
-  (let [rr (first dcs)
-        r (first (. rr (listRacks)))
-        mbuilder (. (Machine/builder context r) (name (random-str 10)) (virtualRamInMb 1024) (virtualCpuCores 4) (ip "1.1.1.1") (port 80) (state "MANAGED") (user "root") (password "temporal"))
-        m (. mbuilder (build))  ]
-             (. m (save))))
-  
+    (do 
+      (create)
+      (create-racks)))
+   )  

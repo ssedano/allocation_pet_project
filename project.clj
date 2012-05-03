@@ -13,5 +13,6 @@
                  [org.jclouds.provider/jclouds-abiquo "2.2-SNAPSHOT"]
                  [org.jclouds/jclouds-compute "1.4.0"]
                  [ch.qos.logback/logback-classic "1.0.0"]
-                 [faker "0.2.2"]]
+                 [faker "0.2.2"]
+                 [org.clojars.tavisrudd/redis-clojure "1.3.1"]]
   :main allocation_clj.core)
